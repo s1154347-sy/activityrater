@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7天活动记录</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; background: #f4f5f7; color: #222; line-height: 1.55; }
+  header { background: #2b3a55; color: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header .field { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  header input[type=text] { padding: 4px 8px; border: none; border-radius: 4px; font-size: 13px; width: 110px; }
+  main { max-width: 860px; margin: 14px auto; padding: 0 14px 40px; }
+  .card { background: #fff; border-radius: 10px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 14px; }
+  .card h2 { font-size: 16px; margin-bottom: 12px; color: #2b3a55; }
+  .card p, .card li { font-size: 14px; margin-bottom: 6px; }
+  .btn { display: inline-block; background: #2b6cb0; color: #fff; border: none; padding: 9px 20px; font-size: 14px; border-radius: 6px; cursor: pointer; margin: 6px 8px 0 0; }
+  .btn:hover { background: #245a94; }
+  .btn.secondary { background: #718096; }
+  .btn.small { padding: 5px 12px; font-size: 12.5px; margin: 0; }
+  .btn.danger { background: #c05621; }
+  label.fld { display: block; font-size: 13.5px; margin: 10px 0 4px; color: #333; }
+  input[type=date], input[type=time], input[type=text].full, textarea {
+    padding: 7px 10px; font-size: 14px; border: 1px solid #cbd5e0; border-radius: 6px; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border: 1.5px solid #cbd5e0; border-radius: 20px; padding: 6px 14px; font-size: 13.5px; cursor: pointer; user-select: none; background: #fff; }
+  .chip.on { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
+  .scale { border-top: 1px solid #edf0f3; padding: 10px 0 12px; }
+  .scale .stmt { font-size: 14px; margin-bottom: 6px; }
+  .scaleRow { display: flex; align-items: center; gap: 8px; }
+  .anchor { font-size: 12px; color: #555; flex: 0 0 96px; }
+  .anchor.r { text-align: right; }
+  .dots { display: flex; gap: 10px; flex: 1; justify-content: center; flex-wrap: wrap; }
+  .dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #a0aec0; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; background: #fff; user-select: none; }
+  .dot.on { background: #2b6cb0; border-color: #2b6cb0; color: #fff; }
+  .entry { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 13.5px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .entry .meta { color: #666; font-size: 12.5px; margin-top: 2px; }
+  .status { font-size: 13px; color: #2b6cb0; margin-top: 8px; }
+  .err { color: #c05621; font-weight: 600; font-size: 13px; margin-top: 6px; }
+  .warn { color: #c05621; font-weight: 600; font-size: 13px; }
+  .miss { background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #c05621; margin-top: 8px; display: none; }
+  .noneBox { display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>7 天活动记录</h1>
+  <div class="field">被试编号：<input type="text" id="pid" placeholder="VN03"></div>
+</header>
+<main>
+  <div class="card">
+    <h2>怎么记</h2>
+    <p>接下来连续 7 天，每次你进行<strong>课外中文电子活动</strong>（和上课、作业无关的），就记一条：当晚睡前一次性补记也可以，但越早记越准。</p>
+    <p>每条记录填：日期、开始和结束时间、活动、使用的 App、使用的设备，然后给 8 组描述打分（点 1–7 中的一个圆点）。打分没有对错，凭你<strong>当时的真实感受</strong>。</p>
+    <p>如果某天你没有任何课外中文电子活动，请点「今天没有活动」并简单说明原因。</p>
+    <p><strong>每天睡前</strong>点「导出 CSV」，把生成的文件用<strong>微信</strong>以「文件」形式发回给研究者；发送后可以继续记，数据不会丢。</p>
+    <p class="warn">请勿删除或清除浏览器数据，否则已保存的记录会丢失。</p>
+  </div>
+
+  <div class="card">
+    <h2>新增一条记录</h2>
+    <div class="row">
+      <div><label class="fld">日期 *</label><input type="date" id="fDate"></div>
+      <div><label class="fld">开始时间 *</label><input type="time" id="fStart"></div>
+      <div><label class="fld">结束时间 *</label><input type="time" id="fEnd"></div>
+    </div>
+    <div class="row">
+      <div><label class="fld">活动（请自己填写，如：刷中文短视频） *</label><input type="text" class="full" id="fAct" placeholder="请填写活动"></div>
+      <div><label class="fld">使用的 App（如：抖音、YouTube、ChatGPT） *</label><input type="text" class="full" id="fApp" placeholder="请填写 App"></div>
+    </div>
+    <label class="fld">使用的设备（可多选） *</label>
+    <div class="chips" id="medChips"></div>
+
+    <div id="scales"></div>
+
+    <div style="margin-top:14px">
+      <button class="btn" id="btnAdd">提交这条记录</button>
+      <button class="btn secondary" id="btnNone">今天没有活动</button>
+      <span class="status" id="formStatus"></span>
+    </div>
+    <div class="miss" id="missBox"></div>
+
+    <div class="noneBox" id="noneBox">
+      <label class="fld" style="margin-top:0">今天没有课外中文电子活动的原因（必填，一两句即可） *</label>
+      <textarea id="noneReason" placeholder="例如：今天课业太多，没有时间；或者：今天没有特别接触中文。"></textarea>
+      <div style="margin-top:10px">
+        <button class="btn" id="btnNoneSave">提交（今天没有活动）</button>
+        <button class="btn secondary" id="btnNoneCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>已保存的记录</h2>
+    <p class="status" id="listStatus"></p>
+    <div id="entryList"></div>
+    <div style="margin-top:10px">
+      <button class="btn" id="btnCsv">导出全部记录（CSV）</button>
+    </div>
+    <p class="status">导出后请用微信以「文件」形式发送给研究者（每天晚上一次）。</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const MEDS = ['手机', '电脑', '平板', '其他'];
+  const SCALES = [
+    { stmt: '总的来说，这项活动很……', l: '有趣', r: '无聊' },
+    { stmt: '在这项活动中，我……', l: '非常专注', r: '完全没有专注' },
+    { stmt: '我对中文语言本身（词语、句子、发音）的专注程度：', l: '完全没有', r: '完全专注' },
+    { stmt: '这项活动对我来说……', l: '非常有趣', r: '完全没有兴趣' },
+    { stmt: '这项活动对我中文水平提升的作用：', l: '几乎没有', r: '很大' },
+    { stmt: '我把这项活动当作娱乐，而不是一种学中文的活动：', l: '完全不同意', r: '非常同意' },
+    { stmt: '我真的……这项活动。', l: '不喜欢', r: '很喜欢' },
+    { stmt: '我专注于内容（信息、情节）本身的程度：', l: '完全没有', r: '完全' }
+  ];
+  const CSV_HEAD = 'pid,date,start,end,activity,app,medium,s1,s2,s3,s4,s5_improvement,s6_entertainment,s7_liked,s8_focus_content,no_activity_reason';
+
+  const LS_KEY = 'cebcq_diary_v2';
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { entries = []; }
+  const save = () => localStorage.setItem(LS_KEY, JSON.stringify(entries));
+  let scaleVals = [0, 0, 0, 0, 0, 0, 0, 0];
+
+  // 设备 chips
+  const mc = $('medChips');
+  MEDS.forEach(m => {
+    const c = document.createElement('span'); c.className = 'chip'; c.textContent = m; c.dataset.v = m;
+    c.addEventListener('click', () => c.classList.toggle('on'));
+    mc.appendChild(c);
+  });
+
+  // 量表
+  const sc = $('scales');
+  SCALES.forEach((sd, i) => {
+    const div = document.createElement('div'); div.className = 'scale';
+    let dots = '';
+    for (let v = 1; v <= 7; v++) dots += `<span class="dot" data-i="${i}" data-v="${v}">${v}</span>`;
+    div.innerHTML = `<div class="stmt">${i + 1}. ${sd.stmt}</div>
+      <div class="scaleRow"><span class="anchor">${sd.l}</span><span class="dots">${dots}</span><span class="anchor r">${sd.r}</span></div>`;
+    sc.appendChild(div);
+  });
+  sc.querySelectorAll('.dot').forEach(d => d.addEventListener('click', () => {
+    const i = +d.dataset.i;
+    scaleVals[i] = +d.dataset.v;
+    sc.querySelectorAll(`.dot[data-i="${i}"]`).forEach(x => x.classList.toggle('on', x === d));
+  }));
+
+  function showMiss(items) {
+    const box = $('missBox');
+    if (!items.length) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.innerHTML = '还有以下内容没有填写，请补全后再提交：<br>· ' + items.join('<br>· ');
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function resetForm() {
+    scaleVals = [0, 0, 0, 0, 0, 0, 0, 0];
+    document.querySelectorAll('.dot').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('#medChips .chip').forEach(x => x.classList.remove('on'));
+    $('fAct').value = ''; $('fApp').value = '';
+    $('fStart').value = ''; $('fEnd').value = '';
+  }
+
+  $('btnAdd').addEventListener('click', () => {
+    const miss = [];
+    if (!$('pid').value.trim()) miss.push('被试编号（页面最上方）');
+    if (!$('fDate').value) miss.push('日期');
+    if (!$('fStart').value) miss.push('开始时间');
+    if (!$('fEnd').value) miss.push('结束时间');
+    if (!$('fAct').value.trim()) miss.push('活动');
+    if (!$('fApp').value.trim()) miss.push('使用的 App');
+    const meds = [...document.querySelectorAll('#medChips .chip.on')].map(c => c.dataset.v);
+    if (!meds.length) miss.push('使用的设备（至少选一项）');
+    scaleVals.forEach((v, i) => { if (!v) miss.push(`第 ${i + 1} 题打分`); });
+    if (miss.length) { showMiss(miss); return; }
+    showMiss([]);
+    entries.push({
+      pid: $('pid').value.trim(), date: $('fDate').value, start: $('fStart').value, end: $('fEnd').value,
+      activity: $('fAct').value.trim(), app: $('fApp').value.trim(), medium: meds.join(';'),
+      s: scaleVals.slice(), reason: ''
+    });
+    save(); resetForm();
+    $('formStatus').textContent = '已保存。';
+    renderList();
+  });
+
+  // 今天没有活动
+  $('btnNone').addEventListener('click', () => { $('noneBox').style.display = 'block'; });
+  $('btnNoneCancel').addEventListener('click', () => { $('noneBox').style.display = 'none'; });
+  $('btnNoneSave').addEventListener('click', () => {
+    const miss = [];
+    if (!$('pid').value.trim()) miss.push('被试编号（页面最上方）');
+    if (!$('fDate').value) miss.push('日期');
+    if (!$('noneReason').value.trim()) miss.push('今天没有活动的原因');
+    if (miss.length) { showMiss(miss); return; }
+    showMiss([]);
+    entries.push({
+      pid: $('pid').value.trim(), date: $('fDate').value, start: '', end: '',
+      activity: '（今天没有课外中文电子活动）', app: '', medium: '',
+      s: null, reason: $('noneReason').value.trim()
+    });
+    save();
+    $('noneBox').style.display = 'none'; $('noneReason').value = '';
+    $('formStatus').textContent = '已保存。';
+    renderList();
+  });
+
+  function renderList() {
+    const box = $('entryList'); box.innerHTML = '';
+    const days = new Set(entries.map(e => e.date));
+    $('listStatus').textContent = entries.length ? `共 ${entries.length} 条记录，覆盖 ${days.size} 天` : '还没有记录。';
+    entries.slice().reverse().forEach((e, ri) => {
+      const idx = entries.length - 1 - ri;
+      const div = document.createElement('div'); div.className = 'entry';
+      const scaleTxt = e.s ? '｜打分：' + e.s.join(',') : '';
+      const reasonTxt = e.reason ? `｜原因：${e.reason}` : '';
+      div.innerHTML = `<div><strong>${e.date}</strong> ${e.start}${e.start ? '–' + e.end : ''}｜${e.activity}` +
+        (e.app ? `｜App：${e.app}` : '') + `<div class="meta">${e.medium || ''}${scaleTxt}${reasonTxt}</div></div>`;
+      const btn = document.createElement('button'); btn.className = 'btn small danger'; btn.textContent = '删除';
+      btn.addEventListener('click', () => { if (confirm('确定删除这条记录吗？')) { entries.splice(idx, 1); save(); renderList(); } });
+      div.appendChild(btn); box.appendChild(div);
+    });
+  }
+
+  $('btnCsv').addEventListener('click', () => {
+    if (!entries.length) { alert('还没有记录可以导出。'); return; }
+    const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+    let csv = CSV_HEAD + '\n';
+    entries.forEach(e => {
+      const sv = e.s || ['', '', '', '', '', '', '', ''];
+      csv += [e.pid, e.date, e.start, e.end, e.activity, e.app, e.medium, ...sv, e.reason || ''].map(esc).join(',') + '\n';
+    });
+    const today = new Date().toISOString().slice(0, 10);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = ($('pid').value.trim() || 'ID') + '_' + today + '.csv';
+    a.click();
+  });
+
+  $('fDate').value = new Date().toISOString().slice(0, 10);
+  $('pid').value = localStorage.getItem('cebcq_diary_pid') || '';
+  $('pid').addEventListener('change', () => localStorage.setItem('cebcq_diary_pid', $('pid').value));
+  renderList();
+})();
+</script>
+</body>
+</html>
